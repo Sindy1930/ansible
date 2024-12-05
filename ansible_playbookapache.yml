@@ -1,0 +1,21 @@
+---
+- hosts: web
+  become: true
+  tasks:
+    - name: Install apache
+      apt: name=apache2 state=present
+    - name: Start apache
+      service: name=apache2 state=started
+    - name: Read-write git checkout from github
+      ansible.builtin.git:
+        repo: 'https://github.com/Sindy1930/ansible.git'
+        dest: /tmp/checkout
+    - name: Deploy Application
+      copy: remote_src=true src=/tmp/checkout/index.html dest=/var/www/html/index.html
+    - name: Change apache port
+      lineinfile:
+        path: /etc/apache2/ports.conf
+        regexp: "^Listen 80"
+        line: "Listen 90"
+    - name: Restart Apache
+      service: name=apache2 state=restarted
